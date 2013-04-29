@@ -4,7 +4,7 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>uk.co.grahamcox</groupId>
   <artifactId>mongo-test</artifactId>
-  <version>1.1</version>
+  <version>1.2-SNAPSHOT</version>
   <packaging>jar</packaging>
   <name>MongoDB Testing support for JUnit</name>
   <repositories>
@@ -46,7 +46,7 @@
     <developerConnection>scm:git:git@github.com:sazzer/mongo-junit.git</developerConnection>
     <connection>scm:git:git@github.com:sazzer/mongo-junit.git</connection>
     <url>scm:git:git@github.com:sazzer/mongo-junit.git</url>
-    <tag>mongo-test-1.1</tag>
+    <tag>HEAD</tag>
   </scm>
   <dependencies>
     <dependency>
