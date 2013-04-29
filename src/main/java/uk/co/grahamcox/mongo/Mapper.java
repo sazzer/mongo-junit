@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 18/04/13 graham
+ * Copyright (C) 29/04/13 graham
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -16,21 +16,15 @@
  */
 package uk.co.grahamcox.mongo;
 
-import java.lang.annotation.ElementType;
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
-import java.lang.annotation.Target;
-
 /**
- * Annotation for a unit test for the source of data to put into a Mongo collection
+ * Mechanism to map an Object as read from the JSON File to an alternative object to put into the Mongo store
  */
-@Retention(RetentionPolicy.RUNTIME)
-@Target(ElementType.TYPE)
-public @interface Source {
-    /** The collection this is for */
-    public String collection();
-    /** The data file to load */
-    public String data();
-    /** The mapper to use */
-    public Class<? extends Mapper> mapper() default Mapper.class;
+public interface Mapper {
+    /**
+     * Map the provided input value to the new output value
+     * @param key the key of the input value
+     * @param input the actual input value
+     * @return the value to store in the datastore
+     */
+    public Object map(String key, Object input);
 }

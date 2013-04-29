@@ -51,9 +51,12 @@ public class MongoTestBase {
     private DB mongoDB;
     /**
      * Set up the database to use
+     * @throws IOException if an error occurs loading the test data
+     * @throws IllegalAccessError if a security error occurs creating a mapper
+     * @throws InstantiationException if a mapper can't be instantiated
      */
     @Before
-    public final void setupDatabase() throws IOException {
+    public final void setupDatabase() throws IOException, IllegalAccessException, InstantiationException {
         int port;
         ServerSocket serverSocket = null;
         try {
@@ -75,15 +78,25 @@ public class MongoTestBase {
         mongoDB = mongoClient.getDB(dbName);
 
         Map<String, String> sources = new HashMap<String, String>();
+        Map<String, Mapper> mappers = new HashMap<String, Mapper>();
+
         Sources sourcesAnnotation = getClass().getAnnotation(Sources.class);
         if (sourcesAnnotation != null) {
             for (Source source : sourcesAnnotation.value()) {
                 sources.put(source.collection(), source.data());
+                if (!source.mapper().equals(Mapper.class)) {
+                    Mapper mapper = source.mapper().newInstance();
+                    mappers.put(source.collection(), mapper);
+                }
             }
         }
         Source sourceAnnotation = getClass().getAnnotation(Source.class);
         if (sourceAnnotation != null) {
             sources.put(sourceAnnotation.collection(), sourceAnnotation.data());
+            if (!sourceAnnotation.mapper().equals(Mapper.class)) {
+                Mapper mapper = sourceAnnotation.mapper().newInstance();
+                mappers.put(sourceAnnotation.collection(), mapper);
+            }
         }
 
         ObjectMapper objectMapper = new ObjectMapper();
@@ -95,7 +108,16 @@ public class MongoTestBase {
             }
             List<Map> dataList = objectMapper.readValue(inputStream, List.class);
             for (Map o : dataList) {
-                collection.insert(new BasicDBObject(o));
+                Mapper mapper = mappers.get(entry.getKey());
+                Map toUse = o;
+                if (mapper != null) {
+                    toUse = new HashMap();
+                    for (Object key : o.keySet()) {
+                        Object realValue = mapper.map(key.toString(), o.get(key));
+                        toUse.put(key, realValue);
+                    }
+                }
+                collection.insert(new BasicDBObject(toUse));
             }
         }
     }
